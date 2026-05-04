@@ -1,0 +1,6 @@
+{
+  "name": "EcoScan",
+  "description": "An environmental analysis tool that uses AI to detect harmful algae growth, sediment deposits, and erosion damage from outdoor photos.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
