@@ -90,7 +90,7 @@ Provide a detailed assessment for each of these four factors, including whether 
   const imageParts: any[] = images.map(img => ({ inlineData: { data: img.data, mimeType: img.mimeType } }));
 
   const response = await ai.models.generateContent({
-    model: "gemini-3.1-pro-preview",
+    model: "gemini-2.5-flash",
     contents: {
       parts: [
         ...imageParts,

@@ -54,19 +54,54 @@ export default function App() {
     setError(null);
   };
 
-  const fileToGenerativePart = (file: File): Promise<{ data: string, mimeType: string }> => {
+  const fileToGenerativePart = async (file: File): Promise<{ data: string, mimeType: string }> => {
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          const base64Data = reader.result.split(',')[1];
-          resolve({ data: base64Data, mimeType: file.type });
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+      img.src = objectUrl;
+      
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 1024;
+        const MAX_HEIGHT = 1024;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
         } else {
-          reject(new Error("Failed to read file"));
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
         }
+        
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error("Failed to get canvas context"));
+          return;
+        }
+        
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Output as webp for high quality and small file size
+        const dataUrl = canvas.toDataURL('image/webp', 0.8);
+        const base64Data = dataUrl.split(',')[1];
+        resolve({ data: base64Data, mimeType: 'image/webp' });
+        
+        URL.revokeObjectURL(objectUrl);
       };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
+      
+      img.onerror = (e) => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error("Failed to process image"));
+      };
     });
   };
 
